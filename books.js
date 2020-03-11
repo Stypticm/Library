@@ -6,7 +6,7 @@ function Book(title, author, pages, read) {
     this.pages = pages;
     this.read = read;
 
-    this.changeStatus = read => {
+    Book.prototype.changeStatus = read => {
         if ((read === undefined) || (read === 'Не прочитана')) {
             read = 'Прочитана';
             let newString = `${title} by ${author}, ${pages}, статус ${read} `;
@@ -16,58 +16,98 @@ function Book(title, author, pages, read) {
             let newString = `${title} by ${author}, ${pages}, статус ${read} `;
             return (newString);
         }
-    }
-
-    this.info = () => {
-        let newString = `${title} by ${author}, ${pages}, статус ${read} `;
-        return (newString);
-    };    
+    };
+    
+    // Book.prototype.info = () => {
+    //     let newString = `${title} by ${author}, ${pages}, статус ${read} `;
+    //     return (newString);
+    // };    
 }
 
-//('Три товарища, Эрик Мария Ремарк, 200 страниц');
-//('Капитанская дочка, Пушкин, 150 страниц');
-//('The Hobbit, J.R.R. Tolkien, 295 pages');
 
 // Функция добавления новой книги
-let inputString = '';
-
-function addBookToLibrary(inputString) {
-    let inputString2 = inputString.split(/\s*,\s*/);
-    let book = new Book(inputString2[0], inputString2[1], inputString2[2], inputString2[3]);
+function addBookToLibrary(titleBook, authorBook, pagesBook, readBook) {
+    let book = new Book(titleBook, authorBook, pagesBook, readBook);
     myLibrary.push(book);
     return myLibrary;
 }
 
-// Кнопка и текст для добавления новой книги
+// Отрисовка библиотеки
+function render() {
+    const libraryBooks = document.querySelector('.libraryBooks');
+    for (let i = 0; i < myLibrary.length; i++) {
+        libraryBooks.innerHTML += `
+                                <div class="col-sm-12 col-md-6 col-xl-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${myLibrary[i].title}</h5>
+                                            <p class="card-text">Author ${myLibrary[i].author}</p>
+                                            <p class="card-text">${myLibrary[i].pages} pages</p>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="read">
+                                                <label class="form-check-label" for="read">Read / Unread</label>
+                                            </div>
+                                            <div class="d-flex justify-content-around">
+                                                <button type="button" class='btn btn-success status'>Прочитана</button>
+                                                <button type="button" class='btn btn-danger bookDelete${i}'>Удалить</button>
+                                            </div>
+                                        </div>                            
+                                    </div>
+                                </div>
+                                `;
+    }
+};
+
+// Кнопка и текст для добавления новой книги,а так же удаления
 function getNewBook() {
-    const myLib = document.querySelector('.myLib');
-    const buttonNewBook = document.querySelector('.newBook');
-    buttonNewBook.addEventListener('click', () => {
-        document.querySelector('.myLib').innerHTML = '<div class="myLib"></div>';
-        addBookToLibrary(inputString = prompt("Введите данные для добавления книги: "));
-        render();
-        for (let i = 0; i < myLibrary.length; i++) {
-            document.querySelector(`.bookDelete${i}`).addEventListener('click', () => {
-                myLib.querySelector(`.book${i}`).remove();
-                myLibrary.splice(i, 1);
-            });
-        };
-        changeStatusBook();
-    });
-}
+    const row = document.querySelector('.row');
+    row.innerHTML = `
+        <div class="collapse formAddNewBook" id="collapseExample">
+            <div class="card card-body">
+                <div class="form-group">
+                   <input type="text" class="form-control" id="title" placeholder="Title">
+                   <input type="text" class="form-control" id="author" placeholder="Author">
+                   <input type="number" class="form-control" id="pages" placeholder="Pages">
+                   <div class="form-check">
+                     <input type="checkbox" class="form-check-input" id="read">
+                     <label class="form-check-label" for="read">Read / Unread</label>
+                   </div>
+                </div>
+                <div class="d-flex justify-content-around">
+                    <button class="btn btn-success submitButton">Submit</button>
+                    <button class="btn btn-danger cancelButton">Cancel</button>
+                </div>      
+            </div>
+        </div>
+        `;
+
+        function valueNull() {
+            document.querySelector('#title').value = "";
+            document.querySelector('#author').value = "";
+            document.querySelector('#pages').value = "";
+            document.querySelector('#read').checked = "";
+            document.querySelector('.formAddNewBook').classList.value = "col-sm-6 formAddNewBook collapse";
+        }
+
+        const submitButton = document.querySelector('.submitButton');
+        submitButton.addEventListener('click', () => {
+            let titleBook = document.querySelector('#title').value;
+            let authorBook = document.querySelector('#author').value;
+            let pagesBook = document.querySelector('#pages').value;
+            let readBook = document.querySelector('#read').checked;
+
+            addBookToLibrary(titleBook, authorBook, pagesBook, readBook);
+            valueNull();
+            render();
+        });
+
+        const cancelButton = document.querySelector('.cancelButton');
+        cancelButton.addEventListener('click', () => {
+            valueNull();
+        });
+};
 getNewBook();
 
-// Отображаение библиотеки в html
-function render() {
-    const myLib = document.querySelector('.myLib');
-    for (let i = 0; i < myLibrary.length; i++) {
-        myLib.innerHTML += `<div class='book${i}'>
-                                ${myLibrary[i].info()}
-                                <button class='status'>Прочитана</button>
-                                <button class='bookDelete${i}'>Удалить</button>
-                            </div>`;
-    }
-}
 
 // Функция изменения статуса прочтения книги
 function changeStatusBook() {
